@@ -44,8 +44,8 @@ A command-line tool for encrypting and decrypting files and folders using a comb
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/yourusername/bge_rsa_aes_file.git
-   cd bge_rsa_aes_file
+   git clone https://github.com/infergit/bge-encryptor.git
+   cd bge-encryptor
    ```
 
 2. **Install Dependencies**
@@ -72,7 +72,7 @@ To simplify the command usage, you can set up an alias for the script.
 2. Add the following line to create an alias:
 
    ```bash
-   alias bge='python /path/to/bge_rsa_aes_file.py'
+   alias bge='python /path/to/bge-encrytor/tools/bge_rsa_aes_file.py'
    ```
 
 3. Save the file and run the following command to apply the changes:
@@ -182,6 +182,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-For issues or feature requests, please open an issue on the [GitHub repository](https://github.com/yourusername/bge_rsa_aes_file).
+For issues or feature requests, please open an issue on the [GitHub repository](https://github.com/infergit/bge-encryptor).
 
 ---
