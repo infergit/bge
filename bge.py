@@ -55,7 +55,7 @@ def main():
 #    key_group.add_argument('-i', '--keyfile', nargs='?', const='~/.ssh/public_rsa.pem', help='RSA key file (public key for encryption, private key for decryption)')
     key_group.add_argument('-k', '--hardware-key', action='store_true', help='Use hardware key for encryption/decryption')
 
-    parser.add_argument('file', nargs='?', help='File to encrypt or decrypt')
+    parser.add_argument('file', nargs='?', help='File to encrypt/decrypt; when used with --genrsakey, this is the output prefix (optional)')
 
     parser.add_argument('-o', '--output', help='Output file or directory for encrypted/decrypted content')
 
@@ -68,8 +68,7 @@ def main():
     args = parser.parse_args()
 
     # Parameter validation
-    if args.genrsakey and not args.output:
-        parser.error("--genrsakey requires -o to specify the output file.")
+    # For --genrsakey, -o is optional; we'll use positional 'file' as prefix or default.
 
     if (args.encrypt or args.decrypt):
         if not args.file:
@@ -86,12 +85,17 @@ def main():
         else:
             _encrypt_folder_cli(args.dir, args.keyfile, args.output, args.recursive, args.workers, args.multiprocessing)
     elif args.genrsakey:
-        priv, pub = generate_rsa_keys(args.output)
-        print(f"RSA keys saved to '{priv}' and '{pub}'")
+        # Determine output prefix: prefer --output, then positional 'file', else default 'rsa_key'
+        output_prefix = args.output or args.file or 'rsa_key'
+        try:
+            priv, pub = generate_rsa_keys(output_prefix)
+            print(f"RSA keys saved to '{priv}' and '{pub}'")
+        except FileExistsError as e:
+            print(f"Error: {e}")
     elif args.encrypt:
         if args.hardware_key:
-            raise NotImplementedError("Encryption file with hardware key is not yet implemented.")
-            # encrypt_file_rsa_aes(args.file, args.output, use_hardware_key=True)
+            out = module_encrypt_file(args.file, args.output, use_hardware_key=True, pkcs11_lib=PKCS11_LIB)
+            print(f"File '{args.file}' successfully encrypted to '{out}'")
         else:
             out = module_encrypt_file(args.file, args.output, public_key_path=args.keyfile)
             print(f"File '{args.file}' successfully encrypted to '{out}'")
