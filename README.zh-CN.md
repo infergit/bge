@@ -11,6 +11,7 @@
 - 快速上手（模块与 CLI）
 - 命令行用法
 - 硬件密钥说明
+- 加密文件格式
 - 安全写入（无空文件）
 - 许可
 
@@ -152,6 +153,22 @@ alias bge='python /absolute/path/to/bge.py'
 - 已支持：基于 PKCS#11 的单文件加/解密；解密底层使用 `pkcs11-tool`。
 - 依赖：`python-pkcs11`（仅在使用硬件功能时需要）与系统 `pkcs11-tool`。
 - PKCS#11 库路径：默认 `DEFAULT_PKCS11_LIB = /opt/homebrew/lib/libykcs11.dylib`，可在 API 中通过 `pkcs11_lib` 覆盖。
+
+## 加密文件格式
+
+BGE 使用自定义的二进制格式存储加密文件。每个加密文件包含以下结构：
+
+```
+[4字节 rsa_len][rsa_cipher][12字节 nonce][ciphertext][16字节 tag]
+```
+
+- **4字节 rsa_len**：RSA 加密的 AES 密钥长度（大端序 uint32）
+- **rsa_cipher**：RSA-OAEP 加密的 AES-256 会话密钥
+- **12字节 nonce**：AES-GCM 随机数
+- **ciphertext**：AES-256-GCM 加密的文件内容
+- **16字节 tag**：AES-GCM 完整性验证标签
+
+此格式通过 AES-256-GCM 确保机密性，通过 GCM 标签确保真实性，同时使用 RSA-OAEP 加密安全保护 AES 会话密钥。
 
 ## 安全写入（无空文件）
 

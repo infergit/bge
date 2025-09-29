@@ -12,6 +12,7 @@ Looking for Chinese docs? See README.zh-CN.md
 - Quick Start (module and CLI)
 - CLI usage
 - Hardware key notes
+- Encrypted file format
 - Safe writes (no empty files)
 - License
 
@@ -155,10 +156,26 @@ Notes:
 - Dependencies: `python-pkcs11` (only when using HW features) and the system `pkcs11-tool`.
 - PKCS#11 path: default `DEFAULT_PKCS11_LIB = /opt/homebrew/lib/libykcs11.dylib`; override via the API’s `pkcs11_lib`.
 
+## Encrypted File Format
+
+BGE uses a custom binary format for encrypted files. Each encrypted file contains the following structure:
+
+```
+[4-byte rsa_len][rsa_cipher][12-byte nonce][ciphertext][16-byte tag]
+```
+
+- **4-byte rsa_len**: Length of the RSA-encrypted AES key (big-endian uint32)
+- **rsa_cipher**: RSA-OAEP encrypted AES-256 session key
+- **12-byte nonce**: Random nonce for AES-GCM
+- **ciphertext**: AES-256-GCM encrypted file content
+- **16-byte tag**: AES-GCM authentication tag for integrity verification
+
+This format ensures both confidentiality (through AES-256-GCM) and authenticity (through the GCM tag), with the AES session key securely protected by RSA-OAEP encryption.
+
 ## Safe writes (no empty files)
 
 - Both encrypt/decrypt first write to a sibling temp file (`<output>.tmp`) and then `os.replace` to the final path on success.
-- If an exception occurs, the temp file is removed so you won’t see empty or corrupt targets.
+- If an exception occurs, the temp file is removed so you won't see empty or corrupt targets.
 
 ## License
 
